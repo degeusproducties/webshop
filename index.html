@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeGeusProducties WebShop</title>
+	<link href="https://assets.jwwb.nl/assets/brand/jouwweb/icon/favicon.png?bust=2299e1307cbb69076146" rel="shortcut icon"> 
+    <style>
+        :root {
+            --primary: #1a252f;
+            --accent: #d35400;
+            --light: #f4f7f6;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --border: #dcdde1;
+        }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: var(--light); color: #333; line-height: 1.6; overflow-x: hidden; }
+        header { background: var(--primary); color: white; padding: 2.5rem 1rem; text-align: center; }
+        
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; position: relative; }
+        
+        @media (max-width: 950px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        /* Sectie Titels */
+        .category-title { 
+            grid-column: 1 / -1; 
+            border-bottom: 3px solid var(--accent); 
+            padding-bottom: 5px; 
+            margin: 2rem 0 1rem 0;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Producten Sectie */
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+        .product-card { 
+            background: white; border-radius: 15px; overflow: hidden;
+            border: 1px solid var(--border); transition: 0.3s; display: flex; flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+        
+        .product-img { width: 100%; height: 200px; object-fit: cover; background: #eee; border-bottom: 1px solid #eee; }
+        
+        .product-info { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        .product-info h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.3rem; }
+        .price { color: var(--accent); font-weight: bold; font-size: 1.4rem; margin-bottom: 10px; display: block; }
+        
+        .extra-desc { font-size: 0.9rem; color: #555; margin-bottom: 1.5rem; flex-grow: 1; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+        
+        .add-btn { 
+            background: var(--primary); color: white; border: none; padding: 0.8rem; 
+            border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%;
+            transition: 0.2s;
+        }
+        .add-btn:hover { background: #2c3e50; }
+
+        /* De Bon / Winkelwagen */
+        .receipt-card { 
+            background: white; padding: 2rem; border-radius: 12px; position: sticky; 
+            top: 20px; border: 2px solid var(--primary); height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: 100;
+        }
+
+        .receipt-card.is-hidden { transform: translateX(calc(100% - 20px)); }
+
+        .toggle-btn {
+            position: absolute; left: -35px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: white; border: none; width: 35px;
+            height: 60px; border-radius: 8px 0 0 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+
+        .receipt-card h3 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        .receipt-item { padding: 12px 0; border-bottom: 1px dashed #eee; }
+        .qty-controls { display: flex; align-items: center; margin-top: 8px; gap: 10px; }
+        .qty-btn { 
+            background: #eee; border: 1px solid #ccc; padding: 2px 8px; 
+            cursor: pointer; border-radius: 4px; font-weight: bold;
+        }
+        .qty-btn:hover { background: #ddd; }
+        
+        .remove-item { 
+            color: var(--danger); background: none; border: none; 
+            cursor: pointer; font-size: 0.8rem; text-decoration: underline; margin-left: auto;
+        }
+        
+        .tax-line { font-size: 0.85rem; color: #666; font-style: italic; display: flex; justify-content: space-between; }
+        .total-row { font-size: 1.5rem; font-weight: bold; margin-top: 20px; display: flex; justify-content: space-between; color: var(--primary); border-top: 2px solid var(--primary); padding-top: 10px; }
+
+        /* Formulier */
+        .order-form { grid-column: 1 / -1; background: white; padding: 3rem; border-radius: 15px; border: 1px solid var(--border); margin-top: 2rem; }
+        .info-box { background: #fff9db; border-left: 6px solid #fcc419; padding: 20px; margin-bottom: 30px; border-radius: 4px; color: #856404; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group { display: flex; flex-direction: column; }
+        input, select { padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        label { margin-bottom: 8px; font-weight: bold; color: #444; }
+
+        .submit-btn { 
+            background: var(--success); color: white; border: none; width: 100%; 
+            padding: 1.5rem; font-size: 1.3rem; border-radius: 8px; cursor: pointer; 
+            font-weight: bold; margin-top: 30px; transition: 0.3s;
+        }
+        .submit-btn:hover { background: #219150; transform: translateY(-2px); }
+        .submit-btn:disabled { background: #adb5bd; cursor: not-allowed; transform: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>DeGeusProducties Webshop</h1>
+    <p>Selecteer uw items en wij regelen de rest via e-mail</p>
+</header>
+
+<div class="container">
+    <div class="shop-area">
+        <h2 class="category-title">Boeken</h2>
+        <div class="shop-grid" id="boekenGrid"></div>
+
+        <h2 class="category-title">Kaarten</h2>
+        <div class="shop-grid" id="kaartenGrid"></div>
+    </div>
+
+    <div class="receipt-card" id="receiptCard">
+        <button class="toggle-btn" onclick="toggleCart()" id="btnIcon">❯</button>
+        <h3>Uw Bestelling</h3>
+        <div id="receipt-list"><p style="color:#888;">Nog geen producten gekozen...</p></div>
+        
+        <div id="tax-details" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; display: none;">
+            <div class="tax-line"><span>Subtotaal (excl. BTW)</span><span id="subtotal-price">€ 0,00</span></div>
+            <div class="tax-line"><span>BTW (21%)</span><span id="vat-price">€ 0,00</span></div>
+        </div>
+
+        <div class="total-row">
+            <span>Totaal:</span>
+            <span id="total-price">€ 0,00</span>
+        </div>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 15px;">* Prijzen zijn inclusief BTW</p>
+        <button onclick="clearCart()" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:0.8rem; text-decoration:underline;">Winkelwagen legen</button>
+    </div>
+
+    <div class="order-form">
+        <div class="info-box">
+            <strong>Belangrijke informatie:</strong> De afhandeling verloopt volledig via e-mail.
+        </div>
+
+        <form action="https://formspree.io/f/xdayrvzb" method="POST" id="mainForm">
+            <input type="hidden" name="Bestelde_Items" id="hiddenReceipt">
+            <input type="hidden" name="Totaal_Bedrag" id="hiddenTotal">
+            <input type="hidden" name="BTW_Bedrag" id="hiddenVAT">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Voornaam</label>
+                    <input type="text" name="voornaam" placeholder="Voornaam" required>
+                </div>
+                <div class="form-group">
+                    <label>Achternaam</label>
+                    <input type="text" name="achternaam" placeholder="Achternaam" required>
+                </div>
+
+                <div class="form-group">
+                    <label>E-mailadres</label>
+                    <input type="email" name="email" placeholder="Uw@email.nl" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefoonnummer</label>
+                    <input type="tel" name="telefoonnummer" placeholder="06 12345678" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Straatnaam + Huisnummer</label>
+                    <input type="text" name="straat_en_huisnummer" placeholder="Hoofdstraat 1" required>
+                </div>
+                <div class="form-group">
+                    <label>Postcode</label>
+                    <input type="text" name="postcode" placeholder="1234 AB" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Plaats</label>
+                    <input type="text" name="woonplaats" placeholder="Amsterdam" required>
+                </div>
+                <div class="form-group">
+                    <label>Land</label>
+                    <select name="land" required>
+                        <option value="Nederland" selected>Nederland</option>
+                        <option value="België">België</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>Bestelling Plaatsen</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const producten = [
+        {id: 1, categorie: "boek", naam: "Hannah Discovers Food. Deel 1", prijs: 14.95, info: "Dit boek laat jonge kinderen kennismaken met 44 soorten groenten en 29 soorten fruit via een voorleesbaar verhaal.", beeld: "https://i.postimg.cc/T3tN63pN/dsc-0177copy-kopie-1.webp"},
+        {id: 2, categorie: "kaart", naam: "Ansichtkaart Beschuit met muisjes (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Vrolijke ansichtkaart met een speelse illustratie van beschuit met muisjes, leuk om te versturen of cadeau te geven.", beeld: "https://i.postimg.cc/7YLcjGN1/4jpg.webp"},
+		{id: 3, categorie: "kaart", naam: "Ansichtkaart Tolhuis De Bilt sneeuw (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart van Tolhuis De Bilt in een winters sneeuwlandschap, leuk om te versturen of te bewaren.", beeld: "https://i.postimg.cc/tCYbWm8F/1jpg-1.webp"},
+		{id: 4, categorie: "kaart", naam: "Ansichtkaart Zonsondergang schip Westkapelle (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een zonsondergang en schip bij Westkapelle, mooi om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/4NVYpdDJ/image-4.webp"},
+		{id: 5, categorie: "kaart", naam: "Ansichtkaart Happy Birthday (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Feestelijke verjaardagskaart met een vrolijk ontwerp, perfect om iemand een fijne verjaardag te wensen.", beeld: "https://i.postimg.cc/d3FzX5VH/5jpg-2.webp"},
+		{id: 6, categorie: "kaart", naam: "Ansichtkaart Paddenstoel op hout (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een paddenstoel op hout, mooi om te versturen of te bewaren.", beeld: "https://i.postimg.cc/rFBSL7k0/image-2.webp"},
+		{id: 7, categorie: "kaart", naam: "Ansichtkaart Appels (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met appels, mooi om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/pT5F7B6Y/2jpg-4.webp"},
+		{id: 8, categorie: "kaart", naam: "Ansichtkaart Madeliefje (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een madeliefje, mooi om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/rFfw1rht/6jpg-1.webp"},
+		{id: 9, categorie: "kaart", naam: "Ansichtkaart Slingers (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Feestelijke ansichtkaart met slingers, leuk om iemand te feliciteren of een vrolijke boodschap te sturen.", beeld: "https://i.postimg.cc/9FRnb3bQ/10ajpg.webp"},
+		{id: 10, categorie: "kaart", naam: "Ansichtkaart Paddenstoel in gras (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een paddenstoel in het gras, leuk om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/zB4cZ0DM/dsc-0498jpg.webp"},
+		{id: 11, categorie: "kaart", naam: "Ansichtkaart Gebakjes (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met gebakjes, leuk om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/mrJwthx0/20220125-170413.webp"},
+    ];
+
+    let cart = [];
+
+    const boekenGrid = document.getElementById('boekenGrid');
+    const kaartenGrid = document.getElementById('kaartenGrid');
+    const receiptList = document.getElementById('receipt-list');
+    const taxDetails = document.getElementById('tax-details');
+    const subtotalDisplay = document.getElementById('subtotal-price');
+    const vatDisplay = document.getElementById('vat-price');
+    const totalPriceDisplay = document.getElementById('total-price');
+    const submitBtn = document.getElementById('submitBtn');
+    const receiptCard = document.getElementById('receiptCard');
+    const btnIcon = document.getElementById('btnIcon');
+
+    function toggleCart() {
+        receiptCard.classList.toggle('is-hidden');
+        btnIcon.innerText = receiptCard.classList.contains('is-hidden') ? "❮" : "❯";
+    }
+
+    // Render producten per categorie
+    producten.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'product-card';
+        div.innerHTML = `
+            <img src="${p.beeld}" class="product-img" alt="${p.naam}">
+            <div class="product-info">
+                <h3>${p.naam}</h3>
+                <span class="price">€ ${p.prijs.toFixed(2).replace('.', ',')}</span>
+                <div class="extra-desc">${p.info}</div>
+                <button class="add-btn" onclick="addToCart(${p.id})">In winkelwagen</button>
+            </div>
+        `;
+        
+        if(p.categorie === "boek") {
+            boekenGrid.appendChild(div);
+        } else {
+            kaartenGrid.appendChild(div);
+        }
+    });
+
+    function addToCart(id) {
+        const bestaandItem = cart.find(item => item.id === id);
+        if (bestaandItem) {
+            bestaandItem.aantal += 1;
+        } else {
+            const product = producten.find(p => p.id === id);
+            cart.push({ ...product, aantal: 1 });
+        }
+        receiptCard.classList.remove('is-hidden');
+        btnIcon.innerText = "❯";
+        renderReceipt();
+    }
+
+    function updateAantal(id, delta) {
+        const item = cart.find(p => p.id === id);
+        if (item) {
+            item.aantal += delta;
+            if (item.aantal <= 0) {
+                cart = cart.filter(p => p.id !== id);
+            }
+        }
+        renderReceipt();
+    }
+
+    function clearCart() {
+        cart = [];
+        renderReceipt();
+    }
+
+    function renderReceipt() {
+        if(cart.length === 0) {
+            receiptList.innerHTML = "<p style='color:#888;'>Winkelwagen is leeg</p>";
+            taxDetails.style.display = "none";
+            totalPriceDisplay.innerText = "€ 0,00";
+            submitBtn.disabled = true;
+            return;
+        }
+
+        submitBtn.disabled = false;
+        taxDetails.style.display = "block";
+        
+        let html = "";
+        let totaalIncl = 0;
+        let bonTekst = "";
+
+        cart.forEach(item => {
+            const itemTotaal = item.prijs * item.aantal;
+            totaalIncl += itemTotaal;
+            bonTekst += `${item.naam} (x${item.aantal}) - €${itemTotaal.toFixed(2)}; `;
+
+            html += `
+                <div class="receipt-item">
+                    <div style="display: flex; justify-content: space-between; font-weight:bold;">
+                        <span>${item.naam}</span>
+                        <span>€ ${itemTotaal.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="qty-controls">
+                        <button type="button" class="qty-btn" onclick="updateAantal(${item.id}, -1)">-</button>
+                        <span>${item.aantal}x</span>
+                        <button type="button" class="qty-btn" onclick="updateAantal(${item.id}, 1)">+</button>
+                        <button type="button" class="remove-item" onclick="updateAantal(${item.id}, -${item.aantal})">verwijder</button>
+                    </div>
+                </div>`;
+        });
+
+        const subtotalExcl = totaalIncl / 1.21;
+        const btwBedrag = totaalIncl - subtotalExcl;
+
+        receiptList.innerHTML = html;
+        subtotalDisplay.innerText = "€ " + subtotalExcl.toFixed(2).replace('.', ',');
+        vatDisplay.innerText = "€ " + btwBedrag.toFixed(2).replace('.', ',');
+        totalPriceDisplay.innerText = "€ " + totaalIncl.toFixed(2).replace('.', ',');
+
+        document.getElementById('hiddenReceipt').value = bonTekst;
+        document.getElementById('hiddenVAT').value = "€ " + btwBedrag.toFixed(2).replace('.', ',');
+        document.getElementById('hiddenTotal').value = "€ " + totaalIncl.toFixed(2).replace('.', ',') + " (Incl. BTW)";
+    }
+</script>
+
+</body>
+</html>
