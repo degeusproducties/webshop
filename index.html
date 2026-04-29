@@ -23,7 +23,6 @@
             .container { grid-template-columns: 1fr; }
         }
 
-        /* Sectie Titels */
         .category-title { 
             grid-column: 1 / -1; 
             border-bottom: 3px solid var(--accent); 
@@ -34,7 +33,6 @@
             letter-spacing: 1px;
         }
 
-        /* Producten Sectie */
         .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
         .product-card { 
             background: white; border-radius: 15px; overflow: hidden;
@@ -58,7 +56,6 @@
         }
         .add-btn:hover { background: #2c3e50; }
 
-        /* De Bon / Winkelwagen */
         .receipt-card { 
             background: white; padding: 2rem; border-radius: 12px; position: sticky; 
             top: 20px; border: 2px solid var(--primary); height: fit-content;
@@ -92,9 +89,10 @@
         }
         
         .tax-line { font-size: 0.85rem; color: #666; font-style: italic; display: flex; justify-content: space-between; }
-        .total-row { font-size: 1.5rem; font-weight: bold; margin-top: 20px; display: flex; justify-content: space-between; color: var(--primary); border-top: 2px solid var(--primary); padding-top: 10px; }
+        .shipping-line { font-size: 0.95rem; color: var(--primary); font-weight: bold; display: flex; justify-content: space-between; margin-top: 10px; padding-top: 5px; border-top: 1px solid #eee; }
+        .shipping-info { font-size: 0.75rem; color: #7f8c8d; margin-bottom: 5px; }
+        .total-row { font-size: 1.5rem; font-weight: bold; margin-top: 15px; display: flex; justify-content: space-between; color: var(--primary); border-top: 2px solid var(--primary); padding-top: 10px; }
 
-        /* Formulier */
         .order-form { grid-column: 1 / -1; background: white; padding: 3rem; border-radius: 15px; border: 1px solid var(--border); margin-top: 2rem; }
         .info-box { background: #fff9db; border-left: 6px solid #fcc419; padding: 20px; margin-bottom: 30px; border-radius: 4px; color: #856404; }
         .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
@@ -134,6 +132,7 @@
         <div id="receipt-list"><p style="color:#888;">Nog geen producten gekozen...</p></div>
         
         <div id="tax-details" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; display: none;">
+            <div id="shipping-display"></div>
             <div class="tax-line"><span>Subtotaal (excl. BTW)</span><span id="subtotal-price">€ 0,00</span></div>
             <div class="tax-line"><span>BTW (21%)</span><span id="vat-price">€ 0,00</span></div>
         </div>
@@ -142,19 +141,20 @@
             <span>Totaal:</span>
             <span id="total-price">€ 0,00</span>
         </div>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 15px;">* Prijzen zijn inclusief BTW</p>
+        <p style="font-size: 0.8rem; color: #666; margin-top: 15px;">* Prijzen zijn inclusief BTW & exclusief verzendkosten</p>
         <button onclick="clearCart()" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:0.8rem; text-decoration:underline;">Winkelwagen legen</button>
     </div>
 
     <div class="order-form">
         <div class="info-box">
-            <strong>Belangrijke informatie:</strong> De afhandeling verloopt volledig via e-mail.
+            <strong>Belangrijke informatie:</strong> De afhandeling verloopt volledig via e-mail. Verzending vindt plaats via DHL (levertijd 1-4 dagen).
         </div>
 
         <form action="https://formspree.io/f/xwvagjar" method="POST" id="mainForm">
             <input type="hidden" name="Bestelde_Items" id="hiddenReceipt">
             <input type="hidden" name="Totaal_Bedrag" id="hiddenTotal">
             <input type="hidden" name="BTW_Bedrag" id="hiddenVAT">
+            <input type="hidden" name="Verzendkosten" id="hiddenShipping">
 
             <div class="form-grid">
                 <div class="form-group">
@@ -204,16 +204,16 @@
 <script>
     const producten = [
         {id: 1, categorie: "boek", naam: "Hannah Discovers Food. Deel 1", prijs: 14.95, info: "Dit boek laat jonge kinderen kennismaken met 44 soorten groenten en 29 soorten fruit via een voorleesbaar verhaal.", beeld: "https://i.postimg.cc/T3tN63pN/dsc-0177copy-kopie-1.webp"},
-        {id: 2, categorie: "kaart", naam: "Ansichtkaart Beschuit met muisjes (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Vrolijke ansichtkaart met een speelse illustratie van beschuit met muisjes, leuk om te versturen of cadeau te geven.", beeld: "https://i.postimg.cc/7YLcjGN1/4jpg.webp"},
-		{id: 3, categorie: "kaart", naam: "Ansichtkaart Tolhuis De Bilt sneeuw (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart van Tolhuis De Bilt in een winters sneeuwlandschap, leuk om te versturen of te bewaren.", beeld: "https://i.postimg.cc/tCYbWm8F/1jpg-1.webp"},
-		{id: 4, categorie: "kaart", naam: "Ansichtkaart Zonsondergang schip Westkapelle (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een zonsondergang en schip bij Westkapelle, mooi om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/4NVYpdDJ/image-4.webp"},
-		{id: 5, categorie: "kaart", naam: "Ansichtkaart Happy Birthday (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Feestelijke verjaardagskaart met een vrolijk ontwerp, perfect om iemand een fijne verjaardag te wensen.", beeld: "https://i.postimg.cc/d3FzX5VH/5jpg-2.webp"},
-		{id: 6, categorie: "kaart", naam: "Ansichtkaart Paddenstoel op hout (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een paddenstoel op hout, mooi om te versturen of te bewaren.", beeld: "https://i.postimg.cc/rFBSL7k0/image-2.webp"},
-		{id: 7, categorie: "kaart", naam: "Ansichtkaart Appels (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met appels, mooi om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/pT5F7B6Y/2jpg-4.webp"},
-		{id: 8, categorie: "kaart", naam: "Ansichtkaart Madeliefje (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een madeliefje, mooi om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/rFfw1rht/6jpg-1.webp"},
-		{id: 9, categorie: "kaart", naam: "Ansichtkaart Slingers (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Feestelijke ansichtkaart met slingers, leuk om iemand te feliciteren of een vrolijke boodschap te sturen.", beeld: "https://i.postimg.cc/9FRnb3bQ/10ajpg.webp"},
-		{id: 10, categorie: "kaart", naam: "Ansichtkaart Paddenstoel in gras (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met een paddenstoel in het gras, leuk om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/zB4cZ0DM/dsc-0498jpg.webp"},
-		{id: 11, categorie: "kaart", naam: "Ansichtkaart Gebakjes (x6)", prijs: 14.95, info: "(Set van 6 ansichtkaart met envelop) Sfeervolle ansichtkaart met gebakjes, leuk om te versturen of als decoratie te bewaren.", beeld: "https://i.postimg.cc/mrJwthx0/20220125-170413.webp"},
+        {id: 2, categorie: "kaart", naam: "Ansichtkaart Beschuit met muisjes (x6)", prijs: 14.95, info: "(Set van 6) Vrolijke ansichtkaart met een speelse illustratie.", beeld: "https://i.postimg.cc/7YLcjGN1/4jpg.webp"},
+		{id: 3, categorie: "kaart", naam: "Ansichtkaart Tolhuis De Bilt sneeuw (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart van Tolhuis De Bilt.", beeld: "https://i.postimg.cc/tCYbWm8F/1jpg-1.webp"},
+		{id: 4, categorie: "kaart", naam: "Ansichtkaart Zonsondergang schip (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart met een zonsondergang bij Westkapelle.", beeld: "https://i.postimg.cc/4NVYpdDJ/image-4.webp"},
+		{id: 5, categorie: "kaart", naam: "Ansichtkaart Happy Birthday (x6)", prijs: 14.95, info: "(Set van 6) Feestelijke verjaardagskaart.", beeld: "https://i.postimg.cc/d3FzX5VH/5jpg-2.webp"},
+		{id: 6, categorie: "kaart", naam: "Ansichtkaart Paddenstoel op hout (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart met een paddenstoel.", beeld: "https://i.postimg.cc/rFBSL7k0/image-2.webp"},
+		{id: 7, categorie: "kaart", naam: "Ansichtkaart Appels (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart met appels.", beeld: "https://i.postimg.cc/pT5F7B6Y/2jpg-4.webp"},
+		{id: 8, categorie: "kaart", naam: "Ansichtkaart Madeliefje (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart met een madeliefje.", beeld: "https://i.postimg.cc/rFfw1rht/6jpg-1.webp"},
+		{id: 9, categorie: "kaart", naam: "Ansichtkaart Slingers (x6)", prijs: 14.95, info: "(Set van 6) Feestelijke ansichtkaart met slingers.", beeld: "https://i.postimg.cc/9FRnb3bQ/10ajpg.webp"},
+		{id: 10, categorie: "kaart", naam: "Ansichtkaart Paddenstoel in gras (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart met een paddenstoel.", beeld: "https://i.postimg.cc/zB4cZ0DM/dsc-0498jpg.webp"},
+		{id: 11, categorie: "kaart", naam: "Ansichtkaart Gebakjes (x6)", prijs: 14.95, info: "(Set van 6) Sfeervolle ansichtkaart met gebakjes.", beeld: "https://i.postimg.cc/mrJwthx0/20220125-170413.webp"},
     ];
 
     let cart = [];
@@ -222,6 +222,7 @@
     const kaartenGrid = document.getElementById('kaartenGrid');
     const receiptList = document.getElementById('receipt-list');
     const taxDetails = document.getElementById('tax-details');
+    const shippingDisplay = document.getElementById('shipping-display');
     const subtotalDisplay = document.getElementById('subtotal-price');
     const vatDisplay = document.getElementById('vat-price');
     const totalPriceDisplay = document.getElementById('total-price');
@@ -234,7 +235,6 @@
         btnIcon.innerText = receiptCard.classList.contains('is-hidden') ? "❮" : "❯";
     }
 
-    // Render producten per categorie
     producten.forEach(p => {
         const div = document.createElement('div');
         div.className = 'product-card';
@@ -247,19 +247,14 @@
                 <button class="add-btn" onclick="addToCart(${p.id})">In winkelwagen</button>
             </div>
         `;
-        
-        if(p.categorie === "boek") {
-            boekenGrid.appendChild(div);
-        } else {
-            kaartenGrid.appendChild(div);
-        }
+        if(p.categorie === "boek") { boekenGrid.appendChild(div); } 
+        else { kaartenGrid.appendChild(div); }
     });
 
     function addToCart(id) {
         const bestaandItem = cart.find(item => item.id === id);
-        if (bestaandItem) {
-            bestaandItem.aantal += 1;
-        } else {
+        if (bestaandItem) { bestaandItem.aantal += 1; } 
+        else {
             const product = producten.find(p => p.id === id);
             cart.push({ ...product, aantal: 1 });
         }
@@ -272,9 +267,7 @@
         const item = cart.find(p => p.id === id);
         if (item) {
             item.aantal += delta;
-            if (item.aantal <= 0) {
-                cart = cart.filter(p => p.id !== id);
-            }
+            if (item.aantal <= 0) { cart = cart.filter(p => p.id !== id); }
         }
         renderReceipt();
     }
@@ -297,12 +290,18 @@
         taxDetails.style.display = "block";
         
         let html = "";
-        let totaalIncl = 0;
+        let productSubtotaal = 0;
+        let aantalBoeken = 0;
+        let aantalKaarten = 0;
         let bonTekst = "";
 
         cart.forEach(item => {
             const itemTotaal = item.prijs * item.aantal;
-            totaalIncl += itemTotaal;
+            productSubtotaal += itemTotaal;
+            
+            if(item.categorie === "boek") aantalBoeken += item.aantal;
+            if(item.categorie === "kaart") aantalKaarten += item.aantal;
+
             bonTekst += `${item.naam} (x${item.aantal}) - €${itemTotaal.toFixed(2)}; `;
 
             html += `
@@ -320,17 +319,50 @@
                 </div>`;
         });
 
-        const subtotalExcl = totaalIncl / 1.21;
-        const btwBedrag = totaalIncl - subtotalExcl;
+        // --- VERZENDKOSTEN LOGICA ---
+        let verzendkosten = 0;
+
+        // Kaarten: €3,70 per 18 stuks (dus 3x €3,70 voor meer dan 36 stuks etc)
+        if(aantalKaarten > 0) {
+            let sets = Math.ceil(aantalKaarten / 18);
+            verzendkosten += (sets * 3.70);
+        }
+
+        // Boeken staffel
+        if(aantalBoeken > 0) {
+            if(aantalBoeken <= 2) {
+                verzendkosten += 3.85;
+            } else if(aantalBoeken >= 20) {
+                verzendkosten += 14.95;
+            } else {
+                // Gemiddelde voor tussen de 2 en 20 boeken
+                verzendkosten += 7.95; 
+            }
+        }
+
+        let totaalMetVerzending = productSubtotaal + verzendkosten;
+        const subtotalExclBtw = totaalMetVerzending / 1.21;
+        const btwBedrag = totaalMetVerzending - subtotalExclBtw;
 
         receiptList.innerHTML = html;
-        subtotalDisplay.innerText = "€ " + subtotalExcl.toFixed(2).replace('.', ',');
-        vatDisplay.innerText = "€ " + btwBedrag.toFixed(2).replace('.', ',');
-        totalPriceDisplay.innerText = "€ " + totaalIncl.toFixed(2).replace('.', ',');
+        
+        shippingDisplay.innerHTML = `
+            <div class="shipping-line">
+                <span>Verzendkosten (DHL)</span>
+                <span>€ ${verzendkosten.toFixed(2).replace('.', ',')}</span>
+            </div>
+            <div class="shipping-info">Levertijd: 1 tot 4 dagen</div>
+        `;
 
+        subtotalDisplay.innerText = "€ " + subtotalExclBtw.toFixed(2).replace('.', ',');
+        vatDisplay.innerText = "€ " + btwBedrag.toFixed(2).replace('.', ',');
+        totalPriceDisplay.innerText = "€ " + totaalMetVerzending.toFixed(2).replace('.', ',');
+
+        // Update verborgen velden voor Formspree
         document.getElementById('hiddenReceipt').value = bonTekst;
+        document.getElementById('hiddenShipping').value = "€ " + verzendkosten.toFixed(2);
         document.getElementById('hiddenVAT').value = "€ " + btwBedrag.toFixed(2).replace('.', ',');
-        document.getElementById('hiddenTotal').value = "€ " + totaalIncl.toFixed(2).replace('.', ',') + " (Incl. BTW)";
+        document.getElementById('hiddenTotal').value = "€ " + totaalMetVerzending.toFixed(2).replace('.', ',') + " (Incl. BTW & Verzending)";
     }
 </script>
 
